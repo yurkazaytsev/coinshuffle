@@ -1,6 +1,7 @@
 from random import randint
 from phase import Phase
 from coin import Coin
+from crypto import Crypto
 
 from ecdsa.util import number_to_string
 import ecdsa
@@ -39,12 +40,18 @@ class Round(object):
     several failed rounds until they have eliminated malicious players.
     """
 
-    def __init__(self,coin, phase, amount, fee, sk, players, addr_new, change):
+    def __init__(self,coin, crypto, phase, amount, fee, sk, players, addr_new, change):
 
         if coin:
             self.__coin = coin
         else:
             raise ValueError('No coin object')
+
+        if crypto:
+            self.__crypto = crypto
+        else:
+            raise ValueError('No crypto object')
+
 
         self.__phase = phase
         #The amount to be shuffled.
@@ -109,6 +116,21 @@ class Round(object):
             # - sand a message for each player who have insufficietn funds
             raise BlameException('Insufficient funds')
 
+    def broadcast_new_key(self ,change_addresses):
+        dk = self.__crypto.make_decryption_key()
+        # Broadcast the public key and store it in the set with everyone else's.
+        self.__encryption_keys[self.__vk] = dk.encryption_key()
+        change_addresses[self.__vk] = self.__change
+        # make messages
+        # broadcast messages
+        return dk
+
+    # In phase 1, everybody announces their new encryption keys to one another. They also
+    # optionally send change addresses to one another. This function reads that information
+    # from a message and puts it in some nice data structures.
+
+    def read_announcements(self, messages, encryption_keys, change):
+        pass
 
     def protocol_definition(self):
 
@@ -124,8 +146,16 @@ class Round(object):
         # that player 1's funds never would have been checked, but it's necessary to check
         # everybody.
         self.blame_insufficient_funds()
-        print("Player " + str(me+1) + " finds sufficient funds")
-
+        print("Player " + str(me + 1) + " finds sufficient funds")
+        # This will contain the change addresses.
+        change_addresses = dict()
+        self.__dk = self.broadcast_new_key(change_addresses)
+        print("Player " + str(me + 1) + " has broadcasted the new encryption key.")
+        # Now we wait to receive similar key from everyone else.
+        announcement =  dict()
+        #TO Reciver form multiple
+        print("Player " + str( me + 1) + " is about to read announcements.")
+        self.read_announcements(announcement, self.__encryption_keys, change_addresses)
 
 
 # Here we generate the private keys of players
@@ -148,6 +178,8 @@ sk  = my_eck
 addr_new = 123123
 change = 12312312
 
-z  = Round(Coin(),begin_phase, amount, fee, sk, players, addr_new, change)
+z  = Round(Coin(),Crypto(),begin_phase, amount, fee, sk, players, addr_new, change)
 
 z.protocol_definition()
+z.broadcast_decryption_key(dict())
+z.__dict__

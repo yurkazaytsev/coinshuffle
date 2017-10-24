@@ -1,10 +1,10 @@
+import sys
 from random import randint
 from phase import Phase
 from coin import Coin
 from crypto import Crypto
 from messages import Messages
 import goless
-
 
 from ecdsa.util import number_to_string
 import ecdsa
@@ -16,46 +16,60 @@ from lib.bitcoin import (
     var_int, op_push, msg_magic)
 
 from coin_shuffle import Round
-
-
 # This file is just for Tests
-
+session = 'usid'
 begin_phase = Phase('Announcement')
 amount = 1000
 fee = 1
 # generate fake signing keys
 G = generator_secp256k1
 _r  = G.order()
-coin = Coin()
-number_of_players = 10
-players_ecks = [EC_KEY(number_to_string(ecdsa.util.randrange( pow(2,256) ) %_r ,_r))  for i in range(number_of_players) ]
-me = randint(0,number_of_players-1)
-my_eck = players_ecks[me]
+number_of_players = 3
+players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
+players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
+players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
+players_changes = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_new_pvks ]
 players_pks =[eck.get_public_key(True) for eck in players_ecks]
 players = dict(zip(range(number_of_players),players_pks))
-sk  = my_eck
-addr_new = "123123"
-change = "12312312"
-inchan = goless.chan()
-outchan = goless.chan()
-logchan = goless.chan()
 
-def logger():
-    while True:
-        print(logchan.recv())
+# Channels definition
+# This is an array for incoming channels of players
+in_channels = [goless.chan() for i in range(number_of_players)]
+# This is an array for outcoming channels of players
+out_channels = [goless.chan() for i in range(number_of_players)]
+# single log channel
+log_chan = goless.chan()
+# broadcasting channel
 
-output_temp = None
+# Here is a players client running protocol
+def go_player(i):
+    z =  Round(Coin(),
+          Crypto(),
+          Messages(),
+          in_channels[i],
+          out_channels[i],
+          log_chan,
+          session,
+          begin_phase,
+          amount,
+          fee,
+          players_ecks[i],
+          players,
+          "as",
+          players_changes[i])
+    z.protocol_definition()
+    in_channels[i].close()
+    out_channels[i].close()
+# Here is collector. It listen to all channels
+def collector():
+    temp = ''
+    for chan in out_channels:
+        temp += chan.recv()
+    for chan in in_channels:
+        chan.send(temp)
+    log_chan.close()
 
-def echo():
-    global output_temp
-    while True:
-        output_temp = outchan.recv()
-        # inchan.send(val)
-
-goless.go(logger)
-goless.go(echo)
-z  = Round(Coin(),Crypto(),Messages(), inchan, outchan, logchan ,begin_phase, amount, fee, sk, players, addr_new, change)
-z.protocol_definition()
-zzz = Messages()
-zzz.packets.ParseFromString(output_temp)
-zzz.packets
+for i in range(number_of_players): goless.go(go_player,i)
+goless.go(collector)
+for msg in log_chan:
+    print(msg)

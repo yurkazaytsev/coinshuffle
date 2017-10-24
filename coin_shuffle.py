@@ -108,7 +108,15 @@ class Round(object):
     # from a message and puts it in some nice data structures.
 
     def read_announcements(self, messages, encryption_keys, change):
-        pass
+        val = self.__inchan.recv()
+        try:
+            self.__messages.packets.ParseFromString(val)
+        except DecodeError:
+            self.__logchan('Error!')
+        if (self.__messages.encryption_keys_count() == self.__N):
+            self.__logchan.send('Player '+ str(self.__me + 1) + ' recieved all keys')
+        else:
+            raise(BlameException)
 
     def protocol_definition(self):
 
@@ -135,4 +143,5 @@ class Round(object):
         announcement =  dict()
         #TO Reciver form multiple
         self.__logchan.send("Player " + str( self.__me + 1) + " is about to read announcements.")
+
         self.read_announcements(announcement, self.__encryption_keys, change_addresses)

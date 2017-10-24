@@ -40,38 +40,22 @@ class Messages(object):
         packet.packet.message.key.key = ek
         if change : packet.packet.message.address.address = change
 
+    def encryption_keys_count(self):
+        return len([1 for packet in self.packets.packet if len(packet.packet.message.key.key) != 0])
 
 
-# # Tests
+# z = Messages()
+# z.add_encryption_key('1',"2")
+# # z.blame_insufficient_funds("2")
+# z.add_encryption_key('3',"2")
 #
-# msgs = Messages()
-# msgs.add_encryption_key('112334456789','asdasda')
-# msgs.sign_packet(msgs.packets.packet[0],2)
-#
-# msgs.packets.ParseFromString(msg_itself)
-#
-#
-# msgs.packets
-#
-# msgs.blame_insufficient_funds('asdasdasdadsvarwef')
-#
-# msg_itself = msgs.packets.SerializeToString()
-#
-#
-# ## Some test goes here
-# packets = message_factory.Packets()
-# packet = packets.packet.add()
-# # Here is how we set up the message
-# packet.packet.message.blame.reason = message_factory.INSUFFICIENTFUNDS
-# packet.packet.message.blame.accused.key = '1121323'
-#
-#
-# ##
-# messages = Messages()
-# msg = message.Message()
-# msg.blame.reason  = 1
-#
-# message
-# float("10.0")
-#
-# None or ""
+# z.encryption_keys_count()
+# #
+# # len([1 for packet in z.packets.packet if len(packet.packet.message.key.key) != 0])
+# #
+# #
+# #
+# # x = Messages()
+# # x.packets.ParseFromString(3*zstr)
+# #
+# # len(x.packets.packet)

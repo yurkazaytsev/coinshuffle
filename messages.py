@@ -55,6 +55,9 @@ class Messages(object):
     def get_encryption_keys(self):
         return {str(packet.packet.from_key.key) : packet.packet.message.key.key.encode('utf-8')  for packet in  self.packets.packet}
 
+    def get_new_addresses(self):
+        return [packet.packet.message.str.encode('utf-8') for packet in self.packets.packet]
+
     def add_str(self, string):
         packet = self.packets.packet.add()
         packet.packet.message.str = string

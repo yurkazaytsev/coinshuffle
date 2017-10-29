@@ -66,7 +66,7 @@ class Round(object):
         # This will contain the new encryption public keys.
         self.__encryption_keys = dict()
         # The set of new addresses into which the coins will be deposited.
-        self.__new_addresses = None
+        self.__new_addresses = set()
         self.__addr_new = addr_new
         # My change address. (may be null).
         self.__change = change
@@ -213,5 +213,23 @@ class Round(object):
                 self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
                 # and send it to next player
                 self.__outchan.send(self.__messages.packets.SerializeToString())
+            #   Phase 3: broadcast outputs.
+            #   In this phase, the last player just broadcasts the transaction to everyone else.
+            self.__phase = 'BroadcastOutput'
+            #Receive all new addresses
+            val = self.__inchan.recv()
+            try:
+                self.__messages.packets.ParseFromString(val)
+            except DecodeError:
+                self.__logchan('Decoding Error!')
+            # extract addresses from packets
+            self.__new_addresses = self.__messages.get_new_addresses()
+            #check if player address is in
+            if self.__addr_new in self.__new_addresses:
+                self.__logchan.send("Player "+ str(self.__me + 1) + " receive addresses and found itsefs")
+            else:
+                self.__logchan.send("Player " + str(self.__me + 1) + "  not found itsefs new address")
+                raise BlameException
+
         except BlameException:
             self.__logchan("Blame!")

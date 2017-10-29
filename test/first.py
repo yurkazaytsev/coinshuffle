@@ -77,9 +77,12 @@ def collector():
     for i in range(number_of_players - 1):
         in_channels[i + 1].send(out_channels[i].recv())
     addrs = out_channels[-1].recv()
-    msgs = Messages()
-    msgs.packets.ParseFromString(addrs)
-    for packet in msgs.packets.packet: print(packet.packet.message.str)
+    # phase 3
+    for chan in in_channels:
+        chan.send(addrs)
+    # msgs = Messages()
+    # msgs.packets.ParseFromString(addrs)
+    # for packet in msgs.packets.packet: print(packet.packet.message.str)
     log_chan.close()
 
 

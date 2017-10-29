@@ -1,0 +1,74 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
+class Crypto(object):
+
+    def __init__(self):
+        self.__backend = default_backend()
+        self.__padding = padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH)
+        self.__hashes = hashes.SHA256()
+        self.__ec_padding = padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA1()),
+                                         algorithm=hashes.SHA1(),
+                                         label=None)
+
+    def generate_key_pair(self):
+        self.__private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=4096,
+            backend=self.__backend)
+
+        self.__public_key = self.__private_key.public_key()
+
+    def public_key(self):
+        """
+        serialization of public key
+        """
+        return self.__public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo)
+
+    def sign(self, message):
+        return self.__private_key.sign(
+            message,
+            self.__padding,
+            self.__hashes)
+
+
+    def verify(self, signature, message):
+        ## it raise exception for wrong signature
+        return self.__public_key.verify(
+            signature,
+            message,
+            self.__padding,
+            self.__hashes )
+
+    def encrypt(self, message, pub_key_string):
+        pub_key = serialization.load_pem_public_key( pub_key_string, backend=default_backend())
+        return pub_key.encrypt(message, self.__ec_padding)
+
+    def decrypt(self, ciphertext):
+        return self.__private_key.decrypt(ciphertext, self.__ec_padding)
+
+#
+#
+# crypta = Crypto()
+# crypta.generate_key_pair()
+# z = crypta.public_key()
+#
+# ciphertext = crypta.encrypt('abcdefg123456',z)
+# crypta.decrypt(ciphertext)
+#
+# message = 'Hello World'
+# signature = crypta.sign(message)
+#
+#
+# pub_key = serialization.load_pem_public_key(z,backend=default_backend())
+# encrypted = pub_key.encrypt('hello world', padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA1()), algorithm=hashes.SHA1(), label=None ))
+# crypta.__private_key
+#
+# crypta.sign('Hello World')

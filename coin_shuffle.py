@@ -95,7 +95,7 @@ class Round(object):
     def broadcast_new_key(self ,change_addresses):
         dk = self.__crypto.generate_key_pair()
         # Broadcast the public key and store it in the set with everyone else's.
-        self.__encryption_keys[self.__vk] = self.__crypto.public_key()
+        self.__encryption_keys[self.__vk] = self.__crypto.export_public_key()
         change_addresses[self.__vk] = self.__change
         self.__messages.add_encryption_key(self.__encryption_keys[self.__vk], change_addresses[self.__vk])
         self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None)
@@ -112,11 +112,23 @@ class Round(object):
         try:
             self.__messages.packets.ParseFromString(val)
         except DecodeError:
-            self.__logchan('Error!')
+            self.__logchan('Decoding Error!')
+
         if (self.__messages.encryption_keys_count() == self.__N):
-            self.__logchan.send('Player '+ str(self.__me + 1) + ' recieved all keys')
+            self.__encryption_keys = self.__messages.get_encryption_keys()
+            self.__logchan.send('Player '+ str(self.__me + 1) + ' recieved all keys for test')
         else:
             raise(BlameException)
+
+
+    def encrypt_new_address(self):
+        # Add our own address to the mix. Note that if me == N, ie, the last player, then no
+        # encryption is done. That is because we have reached the last layer of encryption.
+        encrypted = self.__addr_new
+        for i in range(self.__N - 1, self.__me, -1):
+            # Successively encrypt with the keys of the players who haven't had their turn yet.
+            encrypted = self.__crypto.encrypt(encrypted, self.__encryption_keys[self.__players[i]])
+        return encrypted
 
     def protocol_definition(self):
 
@@ -145,3 +157,61 @@ class Round(object):
         self.__logchan.send("Player " + str( self.__me + 1) + " is about to read announcements.")
 
         self.read_announcements(announcement, self.__encryption_keys, change_addresses)
+
+        # Phase 2: Shuffle
+        # In the shuffle phase, players go in order and reorder the addresses they have been
+        # given by the previous player. They insert their own address in a random location.
+        # Everyone has the incentive to insert their own address at a random location, which
+        # sufficient to ensure that the result appears random to everybody.
+        self.__phase = 'Shuffling'
+        # self.__logchan.send("Player " + str( self.__me + 1) + " reaches phase 2: " + str(self.__encryption_keys))
+        # clear the packets for the messages
+        try:
+            # Player one begins the cycle and encrypts its new address with everyone's
+            # public encryption key, in order.
+            # Each subsequent player reorders the cycle and removes one layer of encryption.
+            self.__messages.clear_packets()
+            if self.__me == 0:
+                self.__messages.add_str(self.encrypt_new_address())
+                # form packet and...
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
+                # ... send it to the next player
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+            elif self.__me == self.__N - 1:
+                # get packets from previous
+                val = self.__inchan.recv()
+                try:
+                    self.__messages.packets.ParseFromString(val)
+                except DecodeError:
+                    self.__logchan('Decoding Error!')
+                # decrypt players layer in every packet
+                for packet in self.__messages.packets.packet:
+                    packet.packet.message.str = self.__crypto.decrypt(packet.packet.message.str)
+                # add the last address
+                self.__messages.add_str(self.__addr_new)
+                # shuffle the packets
+                self.__messages.shuffle_packets()
+                # form packet ...
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, None)
+                # and send it to everyone
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+            else:
+                # get packets from previous
+                val = self.__inchan.recv()
+                try:
+                    self.__messages.packets.ParseFromString(val)
+                except DecodeError:
+                    self.__logchan('Decoding Error!')
+                # decrypt players layer in every packet
+                for packet in self.__messages.packets.packet:
+                    packet.packet.message.str = self.__crypto.decrypt(packet.packet.message.str)
+                # add encrypted new addres of players
+                self.__messages.add_str(self.encrypt_new_address())
+                # shuffle the packets
+                self.__messages.shuffle_packets()
+                # form packet and...
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
+                # and send it to next player
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+        except BlameException:
+            self.__logchan("Blame!")

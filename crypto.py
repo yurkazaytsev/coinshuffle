@@ -1,56 +1,40 @@
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+from ecdsa.util import number_to_string
+import ecdsa
+from lib.bitcoin import (generator_secp256k1, point_to_ser, EC_KEY)
+
+# For now it is ECIES encryption/decryption methods from bitcoin lib. It should be updated for something else i suppose.
 
 class Crypto(object):
 
     def __init__(self):
-        self.__backend = default_backend()
-        self.__padding = padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH)
-        self.__hashes = hashes.SHA256()
+        self.G = generator_secp256k1
+        self._r  = self.G.order()
 
     def generate_key_pair(self):
-        self.__private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-            backend=self.__backend)
+        self.private_key = ecdsa.util.randrange( pow(2,256) ) %self._r
+        self.eck = EC_KEY(number_to_string(self.private_key, self._r))
+        self.public_key = point_to_ser(self.private_key*self.G,True)
 
-        self.__public_key = self.__private_key.public_key()
-
-    def public_key(self):
+    def export_public_key(self):
         """
-        serialization of publik key
+        serialization of public key
         """
-        return self.__public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo)
+        return self.public_key.encode('hex')
 
-    def sign(self, message):
-        return self.__private_key.sign(
-            message,
-            self.__padding,
-            self.__hashes)
+    def encrypt(self, message, pubkey):
+        return self.eck.encrypt_message(message, pubkey.decode('hex'))
 
-    def verify(self, signature, message):
-        ## it raise exception for wrong signature
-        return self.__public_key.verify(
-            signature,
-            message,
-            self.__padding,
-            self.__hashes )
+    def decrypt(self, message):
+        return self.eck.decrypt_message(message)
 
+# crypta1 = Crypto()
+# crypta2 = Crypto()
 #
+# crypta1.generate_key_pair()
+# crypta2.generate_key_pair()
 #
+# msg = "Hello World!"
+# pub1 = crypta1.export_public_key()
+# ciph = crypta2.encrypt(msg ,pub1)
 #
-# crypta =Crypto()
-# crypta.generate_key_pair()
-# crypta.public_key()
-# message = 'Hello World'
-# signature = crypta.sign(message)
-#
-#
-# crypta.sign('Hello World')
+# crypta1.decrypt(ciph) == msg

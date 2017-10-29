@@ -1,3 +1,6 @@
+#
+from imp import reload
+
 import sys
 from random import randint
 from phase import Phase
@@ -16,6 +19,7 @@ from lib.bitcoin import (
     var_int, op_push, msg_magic)
 
 from coin_shuffle import Round
+reload(sys.modules['coin_shuffle'])
 # This file is just for Tests
 session = 'usid'
 begin_phase = Phase('Announcement')
@@ -24,13 +28,14 @@ fee = 1
 # generate fake signing keys
 G = generator_secp256k1
 _r  = G.order()
-number_of_players = 3
+number_of_players = 5
 players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
 players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
 players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
 players_changes = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_new_pvks ]
 players_pks =[eck.get_public_key(True) for eck in players_ecks]
 players = dict(zip(range(number_of_players),players_pks))
+new_addreses_fake = [str(i) for i in range(number_of_players)]
 
 # Channels definition
 # This is an array for incoming channels of players
@@ -55,7 +60,7 @@ def go_player(i):
           fee,
           players_ecks[i],
           players,
-          "as",
+          new_addreses_fake[i],
           players_changes[i])
     z.protocol_definition()
     in_channels[i].close()
@@ -63,11 +68,20 @@ def go_player(i):
 # Here is collector. It listen to all channels
 def collector():
     temp = ''
+    # Phase 1
     for chan in out_channels:
         temp += chan.recv()
     for chan in in_channels:
         chan.send(temp)
+    # Phase 2
+    for i in range(number_of_players - 1):
+        in_channels[i + 1].send(out_channels[i].recv())
+    addrs = out_channels[-1].recv()
+    msgs = Messages()
+    msgs.packets.ParseFromString(addrs)
+    for packet in msgs.packets.packet: print(packet.packet.message.str)
     log_chan.close()
+
 
 for i in range(number_of_players): goless.go(go_player,i)
 goless.go(collector)

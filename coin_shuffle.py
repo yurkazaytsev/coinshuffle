@@ -130,6 +130,30 @@ class Round(object):
             encrypted = self.__crypto.encrypt(encrypted, self.__encryption_keys[self.__players[i]])
         return encrypted
 
+    def equivocation_check(self):
+        # compute hash
+        computed_hash =str( hash( str(self.__new_addresses) + str([self.__encryption_keys[self.__players[i]] for i in range(self.__N) ])))
+        # create a new message
+        self.__messages.clear_packets()
+        # add new hash
+        self.__messages.add_hash(computed_hash)
+        # sign a packets for broadcasting
+        self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None)
+        # broadcast the message
+        self.__outchan.send(self.__messages.packets.SerializeToString())
+        # receive the others message
+        val = self.__inchan.recv()
+        try:
+            self.__messages.packets.ParseFromString(val)
+        except DecodeError:
+            self.__logchan('Decoding Error!')
+        hashes = self.__messages.get_hashes()
+        for hash_value in hashes:
+            if hashes[hash_value] != computed_hash:
+                self.__logchan.send(" someone cheating!")
+                raise BlameException
+        self.__logchan.send('Player ' + str(self.__me + 1) + ' is checked the hashed')
+
     def protocol_definition(self):
 
         if self.__amount <= 0:
@@ -230,6 +254,12 @@ class Round(object):
             else:
                 self.__logchan.send("Player " + str(self.__me + 1) + "  not found itsefs new address")
                 raise BlameException
-
         except BlameException:
             self.__logchan("Blame!")
+        # Phase 4: equivocation check.
+        # In this phase, participants check whether any player has history different
+        # encryption keys to different players.
+
+        self.__phase = 'EquivocationCheck'
+        self.__logchan.send("Player "+ str(self.__me + 1) + " reaches phase 4: ")
+        self.equivocation_check()

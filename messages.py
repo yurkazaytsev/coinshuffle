@@ -58,9 +58,16 @@ class Messages(object):
     def get_new_addresses(self):
         return [packet.packet.message.str.encode('utf-8') for packet in self.packets.packet]
 
+    def get_hashes(self):
+        return {str(packet.packet.from_key.key) : packet.packet.message.hash.hash.encode('utf-8')  for packet in  self.packets.packet}
+
     def add_str(self, string):
         packet = self.packets.packet.add()
         packet.packet.message.str = string
+
+    def add_hash(self, hash_value):
+        packet = self.packets.packet.add()
+        packet.packet.message.hash.hash = hash_value
 
     def shuffle_packets(self):
         packs = [p for p in self.packets.packet]
@@ -75,76 +82,3 @@ class Messages(object):
 
     def clear_packets(self):
         self.__init__()
-
-
-# z.add_encryption_key('first','1')
-# z.add_encryption_key('second','1')
-# z.add_encryption_key('third','1')
-# z.add_encryption_key('fourth','1')
-#
-# {str(packet.packet.from_key.key) :str(packet.packet.message.address.address) for packet in  z.packets.packet}
-#
-#
-# z.packets
-
-# z.get_encryption_keys()
-
-
-
-
-#
-# {packet.packet.message.address.address : packet.packet.message.key.key  for packet in  z.packets.packet}
-#
-# z.packets.packet[0].packet.message.key.key
-#
-# z.shuffle_packets()
-#
-# zz= Messages()
-#
-# pacs = [packet for packet in z.packets.packet]
-# shuffle(pacs)
-#
-#
-#
-# zz.clear_packets()
-# zzz = zz.packets.packet.add()
-# zz.packets.ParseFromString(pacs[0])
-# zz.packets.packet[-1].CopyFrom(pacs[0])
-#
-# type(pacs[0])
-#
-# zz.packets
-#
-# shuffle(pacs)
-# z.packets.ParseFromString("".join(packs))
-#
-#
-#
-# z.add_encryption_key("1","2")
-#
-# x = Messages()
-# x.add_encryption_key("3","4")
-#
-# z.packets.MergeFrom(x.packets)
-#
-#
-# for i in range(10):
-#     z.add_encryption_key(str(i),str(i))
-#
-#
-# # z.clear_packets()
-# [packet.packet.SerializeToString() for packet in z.packets.packet]
-# packs
-# packs
-# z.packets.ParseFromString(packs[0] )
-# z.packets
-# z.encryption_keys_count()
-# #
-# # len([1 for packet in z.packets.packet if len(packet.packet.message.key.key) != 0])
-# #
-# #
-# #
-# # x = Messages()
-# # x.packets.ParseFromString(3*zstr)
-# #
-# # len(x.packets.packet)

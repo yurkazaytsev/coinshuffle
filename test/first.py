@@ -2,7 +2,7 @@
 from imp import reload
 
 import sys
-from random import randint
+from random import (randint, shuffle)
 from phase import Phase
 from coin import Coin
 from crypto import Crypto
@@ -32,10 +32,14 @@ number_of_players = 5
 players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
 players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
 players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
-players_changes = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_new_pvks ]
+players_change_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
+players_changes = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_change_pvks ]
+players_new_addresses = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_new_pvks]
 players_pks =[eck.get_public_key(True) for eck in players_ecks]
 players = dict(zip(range(number_of_players),players_pks))
-new_addreses_fake = [str(i) for i in range(number_of_players)]
+temp =''
+hash_values = ''
+# new_addreses_fake = [str(i) for i in range(number_of_players)]
 
 # Channels definition
 # This is an array for incoming channels of players
@@ -60,14 +64,14 @@ def go_player(i):
           fee,
           players_ecks[i],
           players,
-          new_addreses_fake[i],
+          players_new_addresses[i],
           players_changes[i])
     z.protocol_definition()
     in_channels[i].close()
     out_channels[i].close()
 # Here is collector. It listen to all channels
 def collector():
-    temp = ''
+    global temp, hash_values
     # Phase 1
     for chan in out_channels:
         temp += chan.recv()
@@ -77,12 +81,14 @@ def collector():
     for i in range(number_of_players - 1):
         in_channels[i + 1].send(out_channels[i].recv())
     addrs = out_channels[-1].recv()
-    # phase 3
+    # Phase 3
     for chan in in_channels:
         chan.send(addrs)
-    # msgs = Messages()
-    # msgs.packets.ParseFromString(addrs)
-    # for packet in msgs.packets.packet: print(packet.packet.message.str)
+    # Phase 4
+    for chan in out_channels:
+        hash_values += chan.recv()
+    for chan in in_channels:
+        chan.send(hash_values)
     log_chan.close()
 
 
@@ -90,3 +96,18 @@ for i in range(number_of_players): goless.go(go_player,i)
 goless.go(collector)
 for msg in log_chan:
     print(msg)
+
+
+# msgs = Messages()
+# msgs.packets.ParseFromString(hash_values)
+# msgs.packets
+#
+# encryption_keys = msgs.get_encryption_keys()
+# encryption_keys
+#
+# hash(str([encryption_keys[players[i]] for i in range(number_of_players)]) + str(players_new_addresses))
+#
+# players_new_addresses
+# hash(str(players_new_addresses))
+# # tempo
+# set([1,2,3,4,5])

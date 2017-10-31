@@ -263,3 +263,9 @@ class Round(object):
         self.__phase = 'EquivocationCheck'
         self.__logchan.send("Player "+ str(self.__me + 1) + " reaches phase 4: ")
         self.equivocation_check()
+
+        # Phase 5: verification and submission.
+        # Everyone creates a Bitcoin transaction and signs it, then broadcasts the signature.
+        # If all signatures check out, then the transaction is history into the net.
+        self.__phase = 'VerificationAndSubmission'
+        self.__logchan.send("Player "+ str(self.__me + 1) + " reaches phase 5: ")

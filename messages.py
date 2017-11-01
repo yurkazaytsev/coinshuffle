@@ -6,7 +6,10 @@ class Messages(object):
     def __init__(self):
         self.packets = message_factory.Packets()
 
-    # def sign_last_packet(self, eck):
+    def make_greeting(self, vk):
+        packet = self.packets.packet.add()
+        packet.packet.from_key.key = vk    
+
     def form_last_packet(self, eck, session, number, vk_from , vk_to):
         packet = self.packets.packet[-1]
         packet.packet.session = session

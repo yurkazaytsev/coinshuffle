@@ -63,7 +63,7 @@ class TestServer(unittest.TestCase):
 
         pack3 = mf3.packets.packet.add()
         pack3.packet.from_key.key = vk3
-        req3 = mf2.packets.SerializeToString() + framing_end
+        req3 = mf3.packets.SerializeToString() + framing_end
         # send outcoming messages
         s1.send(req1)
         s2.send(req2)
@@ -140,7 +140,7 @@ class TestServer(unittest.TestCase):
 
         pack3 = mf3.packets.packet.add()
         pack3.packet.from_key.key = vk3
-        req3 = mf2.packets.SerializeToString() + framing_end
+        req3 = mf3.packets.SerializeToString() + framing_end
         # send outcoming messages
         s1.send(req1)
         s2.send(req2)

@@ -7,7 +7,7 @@ class fakeServerThread(threading.Thread):
     """
     This class emulate server behaviour
     """
-    def __init__(self, host, port, number_of_players=5, buffsize=2**10,timeout = 10):
+    def __init__(self, host, port, number_of_players=5, buffsize=2**15,timeout = 10):
         threading.Thread.__init__(self)
         self.frame = unichr(9166).encode('utf-8')
         self.buf_size = buffsize

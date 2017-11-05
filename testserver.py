@@ -6,10 +6,11 @@ import protobuf.message_pb2 as message_factory
 HOST = "localhost"
 PORT = 8080
 framing_end = unichr(9166).encode('utf-8')
+buf_size = 2**14
 
 class TestServer(unittest.TestCase):
 
-    def test_000_server_conncetion(self):
+    def test_1000_server_conncetion(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((HOST,PORT))
         session = None
@@ -30,8 +31,9 @@ class TestServer(unittest.TestCase):
         self.assertIsInstance(number,int)
         self.assertTrue(len(session)>0)
         self.assertTrue(number > 0)
+        s.close()
 
-    def test_010_broadcast(self):
+    def test_001_broadcast(self):
         # make a sockets for 3 player
         s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s1.connect((HOST,PORT))
@@ -69,9 +71,9 @@ class TestServer(unittest.TestCase):
         s2.send(req2)
         s3.send(req3)
         # receive the outputs
-        res1 = s1.recv(1024)
-        res2 = s2.recv(1024)
-        res3 = s3.recv(1024)
+        res1 = s1.recv(buf_size)
+        res2 = s2.recv(buf_size)
+        res3 = s3.recv(buf_size)
         # unparse messages
         mf1.packets.ParseFromString(res1[:-3])
         mf2.packets.ParseFromString(res2[:-3])
@@ -93,18 +95,24 @@ class TestServer(unittest.TestCase):
         self.assertTrue(len(set([number1, number2, number3])) == 3)
         # assert sessions
         self.assertTrue(len(set([session1, session2, session3]))==3)
+        #receive Announcement
+        an1 = s1.recv(buf_size)
+        an2 = s2.recv(buf_size)
+        an3 = s3.recv(buf_size)
+        self.assertTrue(an1 == an2 == an3)
         # one brodcast
         mf1.clear_packets()
         mf1.packets.packet.add()
         mf1.packets.packet[-1].packet.session = session1
         mf1.packets.packet[-1].packet.number = number1
         mf1.packets.packet[-1].packet.from_key.key = vk1
+        mf1.packets.packet[-1].signature.signature = '12345123123123123'
         req = mf1.packets.SerializeToString() + framing_end
         s1.send(req)
         # others should receive it
-        res1 = s1.recv(1024)
-        res2 = s2.recv(1024)
-        res3 = s3.recv(1024)
+        res1 = s1.recv(buf_size)
+        res2 = s2.recv(buf_size)
+        res3 = s3.recv(buf_size)
         # Everyone should receive the same
         self.assertTrue(res1 == res2 == res3 == req)
 
@@ -146,9 +154,9 @@ class TestServer(unittest.TestCase):
         s2.send(req2)
         s3.send(req3)
         # receive the outputs
-        res1 = s1.recv(1024)
-        res2 = s2.recv(1024)
-        res3 = s3.recv(1024)
+        res1 = s1.recv(buf_size)
+        res2 = s2.recv(buf_size)
+        res3 = s3.recv(buf_size)
         # unparse messages
         mf1.packets.ParseFromString(res1[:-3])
         mf2.packets.ParseFromString(res2[:-3])
@@ -170,6 +178,11 @@ class TestServer(unittest.TestCase):
         self.assertTrue(len(set([number1, number2, number3])) == 3)
         # assert sessions
         self.assertTrue(len(set([session1, session2, session3]))==3)
+        #receive Announcement
+        an1 = s1.recv(buf_size)
+        an2 = s2.recv(buf_size)
+        an3 = s3.recv(buf_size)
+        self.assertTrue(an1 == an2 == an3)
         # one uncast
         mf1.clear_packets()
         mf1.packets.packet.add()
@@ -180,7 +193,7 @@ class TestServer(unittest.TestCase):
         req = mf1.packets.SerializeToString() + framing_end
         s1.send(req)
         # others should receive it
-        res3 = s3.recv(1024)
+        res3 = s3.recv(buf_size)
         # player 3 should recieve the message
         self.assertTrue(req == res3)
 

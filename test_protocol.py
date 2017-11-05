@@ -56,16 +56,15 @@ class protocolThread(threading.Thread):
         self.messages.packets.ParseFromString(req)
         phase = self.messages.get_phase()
         number = self.messages.get_number()
-        # time.sleep(4)
+        time.sleep(4)
         # phase = 1
-        # number = 5
-        # self.messages.clear_packets()
+        # number = self.number_of_players
+        # # self.messages.clear_packets()
         # self.messages.packets.packet.add()
         # self.messages.packets.packet[-1].packet.from_key.key = self.vk
         # self.messages.packets.packet[-1].packet.session = self.session
         # self.messages.packets.packet[-1].packet.number = self.number
         # msgs = self.mailbox.share(self.messages.packets.SerializeToString(), self.number, number)
-        # print("well done " + str(self.number))
 
         if phase == 1 and number > 0:
             print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
@@ -80,8 +79,9 @@ class protocolThread(threading.Thread):
             messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
             self.messages.packets.ParseFromString(messages)
             self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
-        if self.players:
-            print('player #' +str(self.number)+ " get " + str(len(self.players)))
+        print(str(self.players)+ '\n')
+        # if self.players:
+        #     print('player #' +str(self.number)+ " get " + str(len(self.players)))
 
         coin = Coin()
         crypto = Crypto()
@@ -92,7 +92,6 @@ class protocolThread(threading.Thread):
             coin,
             crypto,
             self.messages,
-            self.mailbox,
             self.mailbox,
             log_chan,
             self.session,
@@ -130,7 +129,7 @@ class TestProtocol(unittest.TestCase):
         # generate fake signing keys
         G = generator_secp256k1
         _r  = G.order()
-        number_of_players = 5
+        number_of_players = 3
         players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
         players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
         players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
@@ -141,9 +140,9 @@ class TestProtocol(unittest.TestCase):
         players = dict(zip(range(number_of_players),players_pks))
         print("\n")
         # serverThread = fakeServerThread(HOST, PORT, number_of_players = number_of_players)
+        # serverThread.start()
         #( host, port, vk, amount, fee, sk, addr_new, change)
         playerThreads = [protocolThread(HOST,PORT,players[player],amount,fee,players_ecks[player], players_new_addresses[player], players_changes[player]) for player in players]
-        # serverThread.start()
         for thread in playerThreads: thread.start()
         # serverThread.join()
         self.assertTrue(True)

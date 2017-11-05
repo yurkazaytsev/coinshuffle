@@ -1,5 +1,4 @@
 import socket
-import asyncore
 
 class Mailbox(object):
     """
@@ -7,12 +6,12 @@ class Mailbox(object):
     This version is built upon the socket for communication with server and
     """
 
-    def __init__(self, host, port, timeout = 0):
+    def __init__(self, host, port, timeout = None):
         self.__host = host
         self.__port = port
         self.frame = unichr(9166).encode('utf-8')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.MAX_BLOCK_SIZE = 16384
+        self.MAX_BLOCK_SIZE = 2**14
         self.timeout = timeout
         self.socket.settimeout(self.timeout)
 
@@ -21,37 +20,23 @@ class Mailbox(object):
 
     def send(self, message):
         request = message + self.frame
-        self.socket.sendall(request)
+        self.socket.send(request)
 
     def recv(self):
         response = self.socket.recv(self.MAX_BLOCK_SIZE)
-        # while True:
-        #     try:
-        #         response = self.socket.recv(self.MAX_BLOCK_SIZE)
-        #         return response[:-3]
-        #     except:
-        #         # self.socket.send(self.frame)
-        #         # print('unblocked')
-        #         continue
         return response[:-3]
 
     def close(self):
         self.socket.close()
 
-    def recvfromall(self, number_of_players):
-        messages = ''
-        for i in range(number_of_players):
-            response = self.socket.recv(self.MAX_BLOCK_SIZE)
-            messages += response[:-3]
-        return messages
-
     def share(self, message, number, number_of_players):
         messages =''
-        for i in range(number_of_players):
-            if i + 1 is number:
+        for i in range(1, number_of_players + 1):
+            if i is number:
+                print('i trying to send the message of length:' + str(len(message)))
                 self.send(message)
-            response = self.socket.recv(self.MAX_BLOCK_SIZE)
-            messages += response[:-3]
+            response = self.recv()
+            messages += response
         return messages
 # Testing part
 # from messages import Messages

@@ -1,5 +1,6 @@
 import unittest
 import sys
+import time
 import pprint
 from random import (randint, shuffle)
 from coin import Coin
@@ -7,17 +8,37 @@ from crypto import Crypto
 from messages import Messages
 from mailbox import Mailbox
 from phase import Phase
+from fake_server import fakeServerThread
+import socket
 import threading
+from coin_shuffle import Round
 
+class fakeLogChannel(object):
+
+    def __init__(self):
+        pass
+
+    def send(self, message):
+        print(message)
 
 class protocolThread(threading.Thread):
-    def __init__(self, host, port, vk):
+    """
+    This class emulate thread with protocol run
+    """
+    def __init__(self, host, port, vk, amount, fee, sk, addr_new, change):
         threading.Thread.__init__(self)
         self.messages = Messages()
-        self.mailbox = Mailbox(host,port)
+        self.mailbox = Mailbox(host,port,timeout  = None)
         self.vk = vk
         self.session = None
         self.number = None
+        self.number_of_players = None
+        self.players = {}
+        self.amount = amount
+        self.fee = fee
+        self.sk = sk
+        self.addr_new = addr_new
+        self.change = change
 
     def run(self):
         self.mailbox.connect()
@@ -28,7 +49,62 @@ class protocolThread(threading.Thread):
         self.messages.packets.ParseFromString(req)
         self.session = self.messages.packets.packet[-1].packet.session
         self.number = self.messages.packets.packet[-1].packet.number
-        pp.pprint("session: " + self.session + " number: " + str(self.number))
+        if self.session != '':
+             print("Player #"  + str(self.number)+" get session number.\n")
+        # Here is when announcment should begin
+        req = self.mailbox.recv()
+        self.messages.packets.ParseFromString(req)
+        phase = self.messages.get_phase()
+        number = self.messages.get_number()
+        # time.sleep(4)
+        # phase = 1
+        # number = 5
+        # self.messages.clear_packets()
+        # self.messages.packets.packet.add()
+        # self.messages.packets.packet[-1].packet.from_key.key = self.vk
+        # self.messages.packets.packet[-1].packet.session = self.session
+        # self.messages.packets.packet[-1].packet.number = self.number
+        # msgs = self.mailbox.share(self.messages.packets.SerializeToString(), self.number, number)
+        # print("well done " + str(self.number))
+
+        if phase == 1 and number > 0:
+            print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
+            self.number_of_players = number
+            #Share the keys
+            self.messages.clear_packets()
+            self.messages.packets.packet.add()
+            self.messages.packets.packet[-1].packet.from_key.key = self.vk
+            self.messages.packets.packet[-1].packet.session = self.session
+            self.messages.packets.packet[-1].packet.number = self.number
+            shared_key_message = self.messages.packets.SerializeToString()
+            messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
+            self.messages.packets.ParseFromString(messages)
+            self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
+        if self.players:
+            print('player #' +str(self.number)+ " get " + str(len(self.players)))
+
+        coin = Coin()
+        crypto = Crypto()
+        log_chan = fakeLogChannel()
+        begin_phase = Phase('Announcement')
+        # Make Round
+        protocol = Round(
+            coin,
+            crypto,
+            self.messages,
+            self.mailbox,
+            self.mailbox,
+            log_chan,
+            self.session,
+            begin_phase,
+            self.amount ,
+            self.fee,
+            self.sk,
+            self.players,
+            self.addr_new,
+            self.change)
+        protocol.protocol_definition()
+        self.mailbox.close()
 #
 from ecdsa.util import number_to_string
 import ecdsa
@@ -44,7 +120,6 @@ from coin_shuffle import Round
 HOST = "localhost"
 PORT = 8080
 pp = pprint.PrettyPrinter(indent=4)
-
 
 class TestProtocol(unittest.TestCase):
 
@@ -64,10 +139,13 @@ class TestProtocol(unittest.TestCase):
         players_new_addresses = [ public_key_to_p2pkh(point_to_ser(pvk*G, True)) for pvk in players_new_pvks]
         players_pks =[eck.get_public_key(True) for eck in players_ecks]
         players = dict(zip(range(number_of_players),players_pks))
-        print("")
-        # for i in players: print(players[i])
-        playerThreads = [protocolThread(HOST,PORT,players[player]) for player in players]
+        print("\n")
+        # serverThread = fakeServerThread(HOST, PORT, number_of_players = number_of_players)
+        #( host, port, vk, amount, fee, sk, addr_new, change)
+        playerThreads = [protocolThread(HOST,PORT,players[player],amount,fee,players_ecks[player], players_new_addresses[player], players_changes[player]) for player in players]
+        # serverThread.start()
         for thread in playerThreads: thread.start()
+        # serverThread.join()
         self.assertTrue(True)
 
 

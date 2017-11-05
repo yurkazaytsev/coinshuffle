@@ -8,7 +8,7 @@ class Messages(object):
 
     def make_greeting(self, vk):
         packet = self.packets.packet.add()
-        packet.packet.from_key.key = vk    
+        packet.packet.from_key.key = vk
 
     def form_last_packet(self, eck, session, number, vk_from , vk_to):
         packet = self.packets.packet[-1]
@@ -82,6 +82,24 @@ class Messages(object):
 
     def encryption_keys_count(self):
         return len([1 for packet in self.packets.packet if len(packet.packet.message.key.key) != 0])
+
+    def get_session(self):
+        return self.packets.packet[-1].packet.session
+
+    def get_number(self):
+        return self.packets.packet[-1].packet.number
+
+    def get_from_key(self):
+        return self.packets.packet[-1].packet.from_key.key
+
+    def get_to_key(self):
+        return self.packets.packet[-1].packet.to_key.key
+
+    def get_phase(self):
+        return self.packets.packet[-1].packet.phase
+
+    def get_players(self):
+        return {packet.packet.number : str(packet.packet.from_key.key) for packet in self.packets.packet}
 
     def clear_packets(self):
         self.__init__()

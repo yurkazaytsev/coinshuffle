@@ -33,7 +33,7 @@ class Mailbox(object):
         messages =''
         for i in range(1, number_of_players + 1):
             if i is number:
-                print('i trying to send the message of length:' + str(len(message)))
+                # print('i trying to send the message of length:' + str(len(message)))
                 self.send(message)
             response = self.recv()
             messages += response

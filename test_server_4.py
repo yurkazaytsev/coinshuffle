@@ -67,14 +67,14 @@ class protocolThread(threading.Thread):
                 verification_keys_stage_complete = self.number_of_players == len(self.players)
         print("Player #" + str(self.number) + " got players " + str(self.players)+ '\n')
         self.messages.clear_packets()
-        self.messages.add_str('x'*12)
-        self.messages.packets.packet[-1].packet.from_key.key = self.players[self.number]
+        self.messages.add_str("x"*18)
+        self.messages.packets.packet[-1].packet.from_key.key = self.vk#self.players[self.number]
         self.messages.packets.packet[-1].packet.session = self.session
         self.messages.packets.packet[-1].packet.number = self.number
         self.messages.packets.packet[-1].signature.signature = '1234'
-        outcome_message = self.messages.packets.SerializeToString()
-        print(sys.getsizeof(outcome_message))
-        print("Player " + str(self.number) + " is about to share encrytion key.\n" )
+        outcome_message = self.messages.packets.packet[-1].SerializeToString()
+        # print(outcome_message)
+        # print("Player " + str(self.number) + " is about to share encrytion key.\n" )
         self.mailbox.share(outcome_message, self.number, self.number_of_players)
         time.sleep(2)
         self.mailbox.close()

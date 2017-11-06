@@ -52,36 +52,59 @@ class protocolThread(threading.Thread):
         if self.session != '':
              print("Player #"  + str(self.number)+" get session number.\n")
         # Here is when announcment should begin
-        req = self.mailbox.recv()
-        self.messages.packets.ParseFromString(req)
-        phase = self.messages.get_phase()
-        number = self.messages.get_number()
-        time.sleep(1)
-        # phase = 1
-        # number = self.number_of_players
-        # # self.messages.clear_packets()
-        # self.messages.packets.packet.add()
-        # self.messages.packets.packet[-1].packet.from_key.key = self.vk
-        # self.messages.packets.packet[-1].packet.session = self.session
-        # self.messages.packets.packet[-1].packet.number = self.number
-        # msgs = self.mailbox.share(self.messages.packets.SerializeToString(), self.number, number)
-
-        if phase == 1 and number > 0:
-            print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
-            self.number_of_players = number
-            #Share the keys
-            self.messages.clear_packets()
-            self.messages.packets.packet.add()
-            self.messages.packets.packet[-1].packet.from_key.key = self.vk
-            self.messages.packets.packet[-1].packet.session = self.session
-            self.messages.packets.packet[-1].packet.number = self.number
-            shared_key_message = self.messages.packets.SerializeToString()
-            messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
-            self.messages.packets.ParseFromString(messages)
-            self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
-        print(str(self.players)+ '\n')
-        # if self.players:
-        #     print('player #' +str(self.number)+ " get " + str(len(self.players)))
+        verification_keys_stage_complete = False
+        while not verification_keys_stage_complete:
+            req = self.mailbox.recv()
+            self.messages.packets.ParseFromString(req)
+            session = self.messages.get_session()
+            phase = self.messages.get_phase()
+            number = self.messages.get_number()
+            from_key = self.messages.get_from_key()
+            if phase is not 1:
+                if number > 0 and from_key != '':
+                    self.players[number] = from_key
+            else:
+                if number > 0:
+                    self.number_of_players = number
+                    self.messages.clear_packets()
+                    self.messages.packets.packet.add()
+                    self.messages.packets.packet[-1].packet.session = self.session
+                    self.messages.packets.packet[-1].packet.number = self.number
+                    self.messages.packets.packet[-1].packet.from_key.key = self.vk
+                    outcoming_message = self.messages.packets.SerializeToString()
+                    self.mailbox.send(outcoming_message)
+            if self.number_of_players:
+                verification_keys_stage_complete = self.number_of_players == len(self.players)
+        # req = self.mailbox.recv()
+        # self.messages.packets.ParseFromString(req)
+        # phase = self.messages.get_phase()
+        # number = self.messages.get_number()
+        # time.sleep(1)
+        # # phase = 1
+        # # number = self.number_of_players
+        # # # self.messages.clear_packets()
+        # # self.messages.packets.packet.add()
+        # # self.messages.packets.packet[-1].packet.from_key.key = self.vk
+        # # self.messages.packets.packet[-1].packet.session = self.session
+        # # self.messages.packets.packet[-1].packet.number = self.number
+        # # msgs = self.mailbox.share(self.messages.packets.SerializeToString(), self.number, number)
+        #
+        # if phase == 1 and number > 0:
+        #     print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
+        #     self.number_of_players = number
+        #     #Share the keys
+        #     self.messages.clear_packets()
+        #     self.messages.packets.packet.add()
+        #     self.messages.packets.packet[-1].packet.from_key.key = self.vk
+        #     self.messages.packets.packet[-1].packet.session = self.session
+        #     self.messages.packets.packet[-1].packet.number = self.number
+        #     shared_key_message = self.messages.packets.SerializeToString()
+        #     messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
+        #     self.messages.packets.ParseFromString(messages)
+        #     self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
+        # print(str(self.players)+ '\n')
+        # # if self.players:
+        # #     print('player #' +str(self.number)+ " get " + str(len(self.players)))
 
         coin = Coin()
         crypto = Crypto()

@@ -11,7 +11,7 @@ class Mailbox(object):
         self.__port = port
         self.frame = unichr(9166).encode('utf-8')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.MAX_BLOCK_SIZE = 2**14
+        self.MAX_BLOCK_SIZE = 2**12
         self.timeout = timeout
         self.socket.settimeout(self.timeout)
 
@@ -20,7 +20,8 @@ class Mailbox(object):
 
     def send(self, message):
         request = message + self.frame
-        return self.socket.send(request)
+        # print request
+        return self.socket.sendall(request)
 
 
     def recv(self):

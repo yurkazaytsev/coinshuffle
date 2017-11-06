@@ -28,7 +28,7 @@ class protocolThread(threading.Thread):
     def __init__(self, host, port, vk, amount, fee, sk, addr_new, change):
         threading.Thread.__init__(self)
         self.messages = Messages()
-        self.mailbox = Mailbox(host,port,timeout  = None)
+        self.mailbox = Mailbox(host,port,timeout = None)
         self.vk = vk
         self.session = None
         self.number = None
@@ -56,7 +56,7 @@ class protocolThread(threading.Thread):
         self.messages.packets.ParseFromString(req)
         phase = self.messages.get_phase()
         number = self.messages.get_number()
-        time.sleep(4)
+        time.sleep(1)
         # phase = 1
         # number = self.number_of_players
         # # self.messages.clear_packets()
@@ -103,6 +103,7 @@ class protocolThread(threading.Thread):
             self.addr_new,
             self.change)
         protocol.protocol_definition()
+        time.sleep(10)
         self.mailbox.close()
 #
 from ecdsa.util import number_to_string

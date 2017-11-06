@@ -20,10 +20,13 @@ class Mailbox(object):
 
     def send(self, message):
         request = message + self.frame
-        self.socket.send(request)
+        return self.socket.send(request)
+
 
     def recv(self):
-        response = self.socket.recv(self.MAX_BLOCK_SIZE)
+        response = ''
+        while response[-3:] != self.frame:
+            response += self.socket.recv(self.MAX_BLOCK_SIZE)
         return response[:-3]
 
     def close(self):
@@ -33,7 +36,6 @@ class Mailbox(object):
         messages =''
         for i in range(1, number_of_players + 1):
             if i is number:
-                # print('i trying to send the message of length:' + str(len(message)))
                 self.send(message)
             response = self.recv()
             messages += response

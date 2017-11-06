@@ -1,4 +1,5 @@
 import unittest
+import sys
 import time
 from random import (randint, shuffle)
 from crypto import Crypto
@@ -30,9 +31,6 @@ class protocolThread(threading.Thread):
         self.players = {}
 
     def run(self):
-        crypto = Crypto()
-        crypto.generate_key_pair()
-        enc_key = crypto.export_public_key()
         self.mailbox.connect()
         self.messages.make_greeting(self.vk)
         msg = self.messages.packets.SerializeToString()
@@ -44,58 +42,41 @@ class protocolThread(threading.Thread):
         if self.session != '':
              print("Player #"  + str(self.number)+" get session number.\n")
         # Here is when announcment should begin
-        req = self.mailbox.recv()
-        self.messages.packets.ParseFromString(req)
-        phase = self.messages.get_phase()
-        number = self.messages.get_number()
-        time.sleep(1)
-        if phase == 1 and number > 0:
-            print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
-            self.number_of_players = number
-            #Share the keys
-            self.messages.clear_packets()
-            self.messages.packets.packet.add()
-            self.messages.packets.packet[-1].packet.from_key.key = self.vk
-            self.messages.packets.packet[-1].packet.session = self.session
-            self.messages.packets.packet[-1].packet.number = self.number
-            shared_key_message = self.messages.packets.SerializeToString()
-            messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
-            self.messages.packets.ParseFromString(messages)
-            self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
+        verification_keys_stage_complete = False
+        while not verification_keys_stage_complete:
+            req = self.mailbox.recv()
+            self.messages.packets.ParseFromString(req)
+            session = self.messages.get_session()
+            phase = self.messages.get_phase()
+            number = self.messages.get_number()
+            from_key = self.messages.get_from_key()
+            if phase is not 1:
+                if number > 0 and from_key != '':
+                    self.players[number] = from_key
+            else:
+                if number > 0:
+                    self.number_of_players = number
+                    self.messages.clear_packets()
+                    self.messages.packets.packet.add()
+                    self.messages.packets.packet[-1].packet.session = self.session
+                    self.messages.packets.packet[-1].packet.number = self.number
+                    self.messages.packets.packet[-1].packet.from_key.key = self.vk
+                    outcoming_message = self.messages.packets.SerializeToString()
+                    self.mailbox.send(outcoming_message)
+            if self.number_of_players:
+                verification_keys_stage_complete = self.number_of_players == len(self.players)
         print("Player #" + str(self.number) + " got players " + str(self.players)+ '\n')
-        # crypto = Crypto()
-        # crypto.generate_key_pair()
-        # enc_key = crypto.export_public_key()
-        # clear old messages
         self.messages.clear_packets()
-        # add encrytion key
-        self.messages.add_encryption_key(enc_key, None)
-        # self.messages.add_str('x')
+        self.messages.add_str('x'*12)
         self.messages.packets.packet[-1].packet.from_key.key = self.players[self.number]
         self.messages.packets.packet[-1].packet.session = self.session
         self.messages.packets.packet[-1].packet.number = self.number
-        # self.messages.packets.packet[-1].signature.signature = '1234'
-        # for the packet
-        # self.messages.form_last_packet(self.sk, self.session, self.number, self.vk, None)
-        # # share the keys
+        self.messages.packets.packet[-1].signature.signature = '1234'
         outcome_message = self.messages.packets.SerializeToString()
+        print(sys.getsizeof(outcome_message))
         print("Player " + str(self.number) + " is about to share encrytion key.\n" )
-        msgs = self.mailbox.share(outcome_message, self.number, self.number_of_players)
-        # self.mailbox.send(outcome_message)
-        # print(self.mailbox.send(outcome_message))
-        # # parse the result
-        # try:
-        #     self.messages.packets.ParseFromString(msgs)
-        # except DecodeError:
-        #     print('Decoding Error!')
-        # # get encryption keys
-        # if (self.messages.encryption_keys_count() == self.number_of_players):
-        #     self.encryption_keys = self.messages.get_encryption_keys()
-        #     print('Player '+ str(self.number) + ' recieved all keys for test\n')
-        # else:
-        #     raise Exception('Not get encryption keys!')
-        #
-        time.sleep(10)
+        self.mailbox.share(outcome_message, self.number, self.number_of_players)
+        time.sleep(2)
         self.mailbox.close()
 
 HOST = "localhost"

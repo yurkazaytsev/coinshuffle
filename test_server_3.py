@@ -1,4 +1,5 @@
 import unittest
+import sys
 import time
 from random import (randint, shuffle)
 from crypto import Crypto
@@ -30,9 +31,6 @@ class protocolThread(threading.Thread):
         self.players = {}
 
     def run(self):
-        crypto = Crypto()
-        crypto.generate_key_pair()
-        enc_key = crypto.export_public_key()
         self.mailbox.connect()
         self.messages.make_greeting(self.vk)
         msg = self.messages.packets.SerializeToString()
@@ -63,39 +61,21 @@ class protocolThread(threading.Thread):
             self.messages.packets.ParseFromString(messages)
             self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
         print("Player #" + str(self.number) + " got players " + str(self.players)+ '\n')
-        # crypto = Crypto()
-        # crypto.generate_key_pair()
-        # enc_key = crypto.export_public_key()
-        # clear old messages
         self.messages.clear_packets()
-        # add encrytion key
-        self.messages.add_encryption_key(enc_key, None)
-        # self.messages.add_str('x')
+        self.messages.add_str('x'*25)
         self.messages.packets.packet[-1].packet.from_key.key = self.players[self.number]
         self.messages.packets.packet[-1].packet.session = self.session
         self.messages.packets.packet[-1].packet.number = self.number
-        # self.messages.packets.packet[-1].signature.signature = '1234'
-        # for the packet
-        # self.messages.form_last_packet(self.sk, self.session, self.number, self.vk, None)
-        # # share the keys
+        self.messages.packets.packet[-1].signature.signature = '1234'
         outcome_message = self.messages.packets.SerializeToString()
+        print(sys.getsizeof(outcome_message))
         print("Player " + str(self.number) + " is about to share encrytion key.\n" )
-        msgs = self.mailbox.share(outcome_message, self.number, self.number_of_players)
-        # self.mailbox.send(outcome_message)
-        # print(self.mailbox.send(outcome_message))
-        # # parse the result
-        # try:
-        #     self.messages.packets.ParseFromString(msgs)
-        # except DecodeError:
-        #     print('Decoding Error!')
-        # # get encryption keys
-        # if (self.messages.encryption_keys_count() == self.number_of_players):
-        #     self.encryption_keys = self.messages.get_encryption_keys()
-        #     print('Player '+ str(self.number) + ' recieved all keys for test\n')
-        # else:
-        #     raise Exception('Not get encryption keys!')
-        #
-        time.sleep(10)
+        self.mailbox.send(outcome_message)
+        # print(x, len(outcome_message))
+        # result = self.mailbox.share(outcome_message, self.number, self.number_of_players)
+        # self.messages.packets.ParseFromString(result)
+        # print(self.messages.packets)
+        time.sleep(2)
         self.mailbox.close()
 
 HOST = "localhost"

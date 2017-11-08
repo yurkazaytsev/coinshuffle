@@ -1,14 +1,11 @@
 import unittest
 import sys
 import time
-import pprint
-from random import (randint, shuffle)
 from coin import Coin
 from crypto import Crypto
 from messages import Messages
-from mailbox import Mailbox
+from commutator import Commutator
 from phase import Phase
-from fake_server import fakeServerThread
 import socket
 import threading
 from coin_shuffle import Round
@@ -28,7 +25,8 @@ class protocolThread(threading.Thread):
     def __init__(self, host, port, vk, amount, fee, sk, addr_new, change):
         threading.Thread.__init__(self)
         self.messages = Messages()
-        self.mailbox = Mailbox(host,port,timeout  = None)
+        # self.mailbox = Mailbox(host,port,timeout  = None)
+        self.commutator = Commutator(host, port)
         self.vk = vk
         self.session = None
         self.number = None
@@ -41,32 +39,21 @@ class protocolThread(threading.Thread):
         self.change = change
 
     def run(self):
-        self.mailbox.connect()
+        self.commutator.connect()
         self.messages.make_greeting(self.vk)
         msg = self.messages.packets.SerializeToString()
-        self.mailbox.send(msg)
-        req = self.mailbox.recv()
+        self.commutator.send(msg)
+        req = self.commutator.recv()
         self.messages.packets.ParseFromString(req)
         self.session = self.messages.packets.packet[-1].packet.session
         self.number = self.messages.packets.packet[-1].packet.number
         if self.session != '':
              print("Player #"  + str(self.number)+" get session number.\n")
-        # Here is when announcment should begin
-        req = self.mailbox.recv()
+        # # Here is when announcment should begin
+        req = self.commutator.recv()
         self.messages.packets.ParseFromString(req)
         phase = self.messages.get_phase()
         number = self.messages.get_number()
-        # time.sleep(4)
-        # phase = 1
-        # number = 5
-        # self.messages.clear_packets()
-        # self.messages.packets.packet.add()
-        # self.messages.packets.packet[-1].packet.from_key.key = self.vk
-        # self.messages.packets.packet[-1].packet.session = self.session
-        # self.messages.packets.packet[-1].packet.number = self.number
-        # msgs = self.mailbox.share(self.messages.packets.SerializeToString(), self.number, number)
-        # print("well done " + str(self.number))
-
         if phase == 1 and number > 0:
             print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
             self.number_of_players = number
@@ -77,12 +64,15 @@ class protocolThread(threading.Thread):
             self.messages.packets.packet[-1].packet.session = self.session
             self.messages.packets.packet[-1].packet.number = self.number
             shared_key_message = self.messages.packets.SerializeToString()
-            messages = self.mailbox.share(shared_key_message, self.number, self.number_of_players)
+            self.commutator.send(shared_key_message)
+            messages = ''
+            for i in range(number):
+                messages += self.commutator.recv()
             self.messages.packets.ParseFromString(messages)
             self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
         if self.players:
             print('player #' +str(self.number)+ " get " + str(len(self.players)))
-
+        #
         coin = Coin()
         crypto = Crypto()
         log_chan = fakeLogChannel()
@@ -92,8 +82,8 @@ class protocolThread(threading.Thread):
             coin,
             crypto,
             self.messages,
-            self.mailbox,
-            self.mailbox,
+            self.commutator,
+            self.commutator,
             log_chan,
             self.session,
             begin_phase,
@@ -104,7 +94,8 @@ class protocolThread(threading.Thread):
             self.addr_new,
             self.change)
         protocol.protocol_definition()
-        self.mailbox.close()
+        time.sleep(5)
+        self.commutator.close()
 #
 from ecdsa.util import number_to_string
 import ecdsa
@@ -119,7 +110,7 @@ from coin_shuffle import Round
 # Here is a host and port for cashsuffle server
 HOST = "localhost"
 PORT = 8080
-pp = pprint.PrettyPrinter(indent=4)
+# pp = pprint.PrettyPrinter(indent=4)
 
 class TestProtocol(unittest.TestCase):
 

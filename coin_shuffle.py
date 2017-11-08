@@ -116,7 +116,7 @@ class Round(object):
 
         if (self.__messages.encryption_keys_count() == self.__N):
             self.__encryption_keys = self.__messages.get_encryption_keys()
-            self.__logchan.send('Player '+ str(self.__me + 1) + ' recieved all keys for test')
+            self.__logchan.send('Player '+ str(self.__me) + ' recieved all keys for test')
         else:
             raise(BlameException)
 
@@ -125,7 +125,7 @@ class Round(object):
         # Add our own address to the mix. Note that if me == N, ie, the last player, then no
         # encryption is done. That is because we have reached the last layer of encryption.
         encrypted = self.__addr_new
-        for i in range(self.__N - 1, self.__me, -1):
+        for i in range(self.__N , self.__me, -1):
             # Successively encrypt with the keys of the players who haven't had their turn yet.
             encrypted = self.__crypto.encrypt(encrypted, self.__encryption_keys[self.__players[i]])
         return encrypted
@@ -152,7 +152,7 @@ class Round(object):
             if hashes[hash_value] != computed_hash:
                 self.__logchan.send(" someone cheating!")
                 raise BlameException
-        self.__logchan.send('Player ' + str(self.__me + 1) + ' is checked the hashed')
+        self.__logchan.send('Player ' + str(self.__me) + ' is checked the hashed')
 
     def protocol_definition(self):
 
@@ -162,23 +162,23 @@ class Round(object):
         # Phase 1: Announcement
         # In the announcement phase, participants distribute temporary encryption keys.
         self.__phase = 'Announcement'
-        self.__logchan.send("Player " + str(self.__me + 1) + " begins CoinShuffle protocol " + " with " + str(self.__N) + " players.")
+        self.__logchan.send("Player " + str(self.__me) + " begins CoinShuffle protocol " + " with " + str(self.__N) + " players.")
         # Check for sufficient funds.
         # There was a problem with the wording of the original paper which would have meant
         # that player 1's funds never would have been checked, but it's necessary to check
         # everybody.
         self.blame_insufficient_funds()
-        self.__logchan.send("Player " + str(self.__me + 1) + " finds sufficient funds")
+        self.__logchan.send("Player " + str(self.__me) + " finds sufficient funds")
         # This will contain the change addresses.
         change_addresses = dict()
         # self.__dk = self.broadcast_new_key(change_addresses)
 
         self.broadcast_new_key(change_addresses)
-        self.__logchan.send("Player " + str(self.__me + 1) + " has broadcasted the new encryption key.")
+        self.__logchan.send("Player " + str(self.__me) + " has broadcasted the new encryption key.")
         # Now we wait to receive similar key from everyone else.
         announcement =  dict()
         #TO Reciver form multiple
-        self.__logchan.send("Player " + str( self.__me + 1) + " is about to read announcements.")
+        self.__logchan.send("Player " + str( self.__me) + " is about to read announcements.")
 
         self.read_announcements(announcement, self.__encryption_keys, change_addresses)
 
@@ -195,13 +195,13 @@ class Round(object):
             # public encryption key, in order.
             # Each subsequent player reorders the cycle and removes one layer of encryption.
             self.__messages.clear_packets()
-            if self.__me == 0:
+            if self.__me == 1:
                 self.__messages.add_str(self.encrypt_new_address())
                 # form packet and...
                 self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
                 # ... send it to the next player
                 self.__outchan.send(self.__messages.packets.SerializeToString())
-            elif self.__me == self.__N - 1:
+            elif self.__me == self.__N:
                 # get packets from previous
                 val = self.__inchan.recv()
                 try:
@@ -250,9 +250,9 @@ class Round(object):
             self.__new_addresses = self.__messages.get_new_addresses()
             #check if player address is in
             if self.__addr_new in self.__new_addresses:
-                self.__logchan.send("Player "+ str(self.__me + 1) + " receive addresses and found itsefs")
+                self.__logchan.send("Player "+ str(self.__me) + " receive addresses and found itsefs")
             else:
-                self.__logchan.send("Player " + str(self.__me + 1) + "  not found itsefs new address")
+                self.__logchan.send("Player " + str(self.__me) + "  not found itsefs new address")
                 raise BlameException
         except BlameException:
             self.__logchan("Blame!")
@@ -261,11 +261,11 @@ class Round(object):
         # encryption keys to different players.
 
         self.__phase = 'EquivocationCheck'
-        self.__logchan.send("Player "+ str(self.__me + 1) + " reaches phase 4: ")
+        self.__logchan.send("Player "+ str(self.__me) + " reaches phase 4: ")
         self.equivocation_check()
 
         # Phase 5: verification and submission.
         # Everyone creates a Bitcoin transaction and signs it, then broadcasts the signature.
         # If all signatures check out, then the transaction is history into the net.
         self.__phase = 'VerificationAndSubmission'
-        self.__logchan.send("Player "+ str(self.__me + 1) + " reaches phase 5: ")
+        self.__logchan.send("Player "+ str(self.__me) + " reaches phase 5: ")

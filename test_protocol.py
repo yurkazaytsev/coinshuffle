@@ -71,10 +71,11 @@ class protocolThread(threading.Thread):
             self.messages.packets.ParseFromString(messages)
             self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
         if self.players:
-            print('player #' +str(self.number)+ " get " + str(len(self.players)))
+            print('player #' +str(self.number)+ " get " + str(len(self.players))+".\n")
         #
         coin = Coin()
         crypto = Crypto()
+        self.messages.clear_packets()
         log_chan = fakeLogChannel()
         begin_phase = Phase('Announcement')
         # Make Round
@@ -121,7 +122,7 @@ class TestProtocol(unittest.TestCase):
         # generate fake signing keys
         G = generator_secp256k1
         _r  = G.order()
-        number_of_players = 5
+        number_of_players = 3
         players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
         players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
         players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]

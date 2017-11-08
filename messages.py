@@ -5,23 +5,34 @@ class Messages(object):
 
     def __init__(self):
         self.packets = message_factory.Packets()
+        self.phases = {
+            'Announcement':message_factory.ANNOUNCEMENT, # Everone generates new encryption keys and distributes them to one another.
+            'Shuffling':message_factory.SHUFFLE, # In turn, each of the players adds his own new address and reshufles the result.
+            'BroadcastOutput':message_factory.BROADCAST, # The final output order is broadcast to everyone.
+            'EquivocationCheck':message_factory.EQUIVOCATION_CHECK, # Check that everyone has the same set of inputs.
+            'VerificationAndSubmission':message_factory.VERIFICATION_AND_SUBMISSION, # Generate transaction, distribute signatures, and send it off.
+            'Signing':message_factory.SIGNING,
+            'Blame':message_factory.BLAME, # Someone has attempted to cheat.
+            }
 
     def make_greeting(self, vk):
         packet = self.packets.packet.add()
         packet.packet.from_key.key = vk
 
-    def form_last_packet(self, eck, session, number, vk_from , vk_to):
+    def form_last_packet(self, eck, session, number, vk_from , vk_to, phase):
         packet = self.packets.packet[-1]
         packet.packet.session = session
         packet.packet.number = int(number)
+        packet.packet.phase = self.phases.get(phase)
         packet.packet.from_key.key = vk_from
         if vk_to : packet.packet.to_key.key = vk_to
         msg = packet.packet.SerializeToString()
         packet.signature.signature = eck.sign_message(msg,True)
 
-    def form_all_packets(self, eck, session, number, vk_from, vk_to):
+    def form_all_packets(self, eck, session, number, vk_from, vk_to, phase):
         for packet in self.packets.packet:
             packet.packet.session = session
+            packet.packet.phase = self.phases.get(phase)
             packet.packet.number = int(number)
             packet.packet.session = session
             packet.packet.number = int(number)
@@ -88,6 +99,12 @@ class Messages(object):
 
     def get_number(self):
         return self.packets.packet[-1].packet.number
+
+    def get_encryption_key(self):
+        return self.packets.packet[-1].packet.message.key.key
+
+    def get_address(self):
+        return self.packets.packet[-1].packet.message.address.address
 
     def get_from_key(self):
         return self.packets.packet[-1].packet.from_key.key

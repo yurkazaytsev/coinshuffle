@@ -71,7 +71,7 @@ class Round(object):
         # My change address. (may be null).
         self.__change = change
         self.__signatures = dict()
-        self.__mail_box = None
+        # self.__mail_box = None
 
     def blame_insufficient_funds(self):
         # addresses = [public_key_to_p2pkh(pk) for pk in self.__players.values()]
@@ -88,17 +88,17 @@ class Round(object):
             for i in offenders:
                 self.__messages.blame_insufficient_funds(offender)
                 # self.__messages.sign_last_packet(self.__sk)
-                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None)
+                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
                 self.__outchan.send(self.__messages.packets.SerializeToString())
             raise BlameException('Insufficient funds')
 
     def broadcast_new_key(self ,change_addresses):
         dk = self.__crypto.generate_key_pair()
         # Broadcast the public key and store it in the set with everyone else's.
-        self.__encryption_keys[self.__vk] = self.__crypto.export_public_key()
-        change_addresses[self.__vk] = self.__change
-        self.__messages.add_encryption_key(self.__encryption_keys[self.__vk], change_addresses[self.__vk])
-        self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None)
+        # self.__encryption_keys[self.__vk] = self.__crypto.export_public_key()
+        # change_addresses[self.__vk] = self.__change
+        self.__messages.add_encryption_key(self.__crypto.export_public_key(), self.__change)
+        self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
         # self.__messages.sign_last_packet(self.__sk)
         self.__outchan.send(self.__messages.packets.SerializeToString())
         # return dk
@@ -107,18 +107,21 @@ class Round(object):
     # optionally send change addresses to one another. This function reads that information
     # from a message and puts it in some nice data structures.
 
-    def read_announcements(self, messages, encryption_keys, change):
-        val = self.__inchan.recv()
-        try:
-            self.__messages.packets.ParseFromString(val)
-        except DecodeError:
-            self.__logchan('Decoding Error!')
-
-        if (self.__messages.encryption_keys_count() == self.__N):
-            self.__encryption_keys = self.__messages.get_encryption_keys()
-            self.__logchan.send('Player '+ str(self.__me) + ' recieved all keys for test')
+    def read_announcements(self, messages, encryption_keys, change_addresses):
+        for i in range(self.__N):
+            val = self.__inchan.recv()
+            try:
+                self.__messages.packets.ParseFromString(val)
+            except Exception:
+                self.__logchan.send('Decoding Error!')
+            self.__encryption_keys[self.__messages.get_from_key()] = self.__messages.get_encryption_key()
+            change_addresses[self.__messages.get_from_key()] = self.__messages.get_address()
+        if (len(self.__encryption_keys) == self.__N):
+            # self.__encryption_keys = self.__messages.get_encryption_keys()
+            self.__logchan.send('Player '+ str(self.__me) + ' recieved all keys for test.\n')
         else:
-            raise(BlameException)
+            print(self.__encryption_keys)
+            raise BlameException("Player # " + str(self.__me) + " not get all encryption keys")
 
 
     def encrypt_new_address(self):
@@ -138,7 +141,7 @@ class Round(object):
         # add new hash
         self.__messages.add_hash(computed_hash)
         # sign a packets for broadcasting
-        self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None)
+        self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None, self.__phase)
         # broadcast the message
         self.__outchan.send(self.__messages.packets.SerializeToString())
         # receive the others message
@@ -152,7 +155,7 @@ class Round(object):
             if hashes[hash_value] != computed_hash:
                 self.__logchan.send(" someone cheating!")
                 raise BlameException
-        self.__logchan.send('Player ' + str(self.__me) + ' is checked the hashed')
+        self.__logchan.send('Player ' + str(self.__me) + ' is checked the hashed.\n')
 
     def protocol_definition(self):
 
@@ -162,23 +165,23 @@ class Round(object):
         # Phase 1: Announcement
         # In the announcement phase, participants distribute temporary encryption keys.
         self.__phase = 'Announcement'
-        self.__logchan.send("Player " + str(self.__me) + " begins CoinShuffle protocol " + " with " + str(self.__N) + " players.")
+        self.__logchan.send("Player " + str(self.__me) + " begins CoinShuffle protocol " + " with " + str(self.__N) + " players.\n")
         # Check for sufficient funds.
         # There was a problem with the wording of the original paper which would have meant
         # that player 1's funds never would have been checked, but it's necessary to check
         # everybody.
         self.blame_insufficient_funds()
-        self.__logchan.send("Player " + str(self.__me) + " finds sufficient funds")
+        self.__logchan.send("Player " + str(self.__me) + " finds sufficient funds.\n")
         # This will contain the change addresses.
         change_addresses = dict()
         # self.__dk = self.broadcast_new_key(change_addresses)
 
         self.broadcast_new_key(change_addresses)
-        self.__logchan.send("Player " + str(self.__me) + " has broadcasted the new encryption key.")
+        self.__logchan.send("Player " + str(self.__me) + " has broadcasted the new encryption key.\n")
         # Now we wait to receive similar key from everyone else.
         announcement =  dict()
         #TO Reciver form multiple
-        self.__logchan.send("Player " + str( self.__me) + " is about to read announcements.")
+        self.__logchan.send("Player " + str( self.__me) + " is about to read announcements.\n")
 
         self.read_announcements(announcement, self.__encryption_keys, change_addresses)
 
@@ -198,7 +201,7 @@ class Round(object):
             if self.__me == 1:
                 self.__messages.add_str(self.encrypt_new_address())
                 # form packet and...
-                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1],self.__phase)
                 # ... send it to the next player
                 self.__outchan.send(self.__messages.packets.SerializeToString())
             elif self.__me == self.__N:
@@ -216,7 +219,7 @@ class Round(object):
                 # shuffle the packets
                 self.__messages.shuffle_packets()
                 # form packet ...
-                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, None)
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, None, self.__phase)
                 # and send it to everyone
                 self.__outchan.send(self.__messages.packets.SerializeToString())
             else:
@@ -234,7 +237,7 @@ class Round(object):
                 # shuffle the packets
                 self.__messages.shuffle_packets()
                 # form packet and...
-                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1])
+                self.__messages.form_all_packets(self.__sk, self.__session, self.__me, self.__vk, self.__players[self.__me + 1], self.__phase)
                 # and send it to next player
                 self.__outchan.send(self.__messages.packets.SerializeToString())
             #   Phase 3: broadcast outputs.

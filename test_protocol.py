@@ -16,7 +16,7 @@ class fakeLogChannel(object):
         pass
 
     def send(self, message):
-        print(message)
+        print(message + ".\n")
 
 class protocolThread(threading.Thread):
     """
@@ -26,7 +26,7 @@ class protocolThread(threading.Thread):
         threading.Thread.__init__(self)
         self.messages = Messages()
         # self.mailbox = Mailbox(host,port,timeout  = None)
-        self.commutator = Commutator(host, port)
+        self.commutator = Commutator(host, port, timeout = None, switch_time = None)
         self.vk = vk
         self.session = None
         self.number = None
@@ -95,7 +95,7 @@ class protocolThread(threading.Thread):
             self.addr_new,
             self.change)
         protocol.protocol_definition()
-        time.sleep(5)
+        time.sleep(60)
         self.commutator.close()
 #
 from ecdsa.util import number_to_string

@@ -25,7 +25,10 @@ class Messages(object):
         packet.packet.number = int(number)
         packet.packet.phase = self.phases.get(phase)
         packet.packet.from_key.key = vk_from
-        if vk_to : packet.packet.to_key.key = vk_to
+        if vk_to:
+            packet.packet.to_key.key = vk_to
+        else:
+            packet.packet.ClearField('to_key')
         msg = packet.packet.SerializeToString()
         packet.signature.signature = eck.sign_message(msg,True)
 
@@ -37,7 +40,10 @@ class Messages(object):
             packet.packet.session = session
             packet.packet.number = int(number)
             packet.packet.from_key.key = vk_from
-            if vk_to : packet.packet.to_key.key = vk_to
+            if vk_to :
+                 packet.packet.to_key.key = vk_to
+            else:
+                packet.packet.ClearField('to_key')
             msg = packet.packet.SerializeToString()
             packet.signature.signature = eck.sign_message(msg,True)
 
@@ -66,11 +72,11 @@ class Messages(object):
         packet.packet.message.key.key = ek
         if change : packet.packet.message.address.address = change
 
-    def get_encryption_keys(self):
-        return {str(packet.packet.from_key.key) : packet.packet.message.key.key.encode('utf-8')  for packet in  self.packets.packet}
+    # def get_encryption_keys(self):
+    #     return {str(packet.packet.from_key.key) : packet.packet.message.key.key.encode('utf-8')  for packet in  self.packets.packet}
 
     def get_new_addresses(self):
-        return [packet.packet.message.str.encode('utf-8') for packet in self.packets.packet]
+        return [packet.packet.message.str for packet in self.packets.packet]
 
     def get_hashes(self):
         return {str(packet.packet.from_key.key) : packet.packet.message.hash.hash.encode('utf-8')  for packet in  self.packets.packet}
@@ -82,6 +88,10 @@ class Messages(object):
     def add_hash(self, hash_value):
         packet = self.packets.packet.add()
         packet.packet.message.hash.hash = hash_value
+
+    def add_signature(self, signature):
+        packet = self.packets.packet.add()
+        packet.packet.message.signature.signature = signature
 
     def shuffle_packets(self):
         packs = [p for p in self.packets.packet]
@@ -115,8 +125,23 @@ class Messages(object):
     def get_phase(self):
         return self.packets.packet[-1].packet.phase
 
+    def get_hash(self):
+        return self.packets.packet[-1].packet.message.hash.hash
+
+    def get_str(self):
+        return self.packets.packet[-1].packet.message.str
+
+    def get_signature(self):
+        return self.packets.packet[-1].packet.message.signature.signature
+
+    def get_signatures_and_packets(self):
+        return [ [packet.signature.signature, packet.packet.SerializeToString(), packet.packet.from_key.key] for packet in self.packets.packet]
+
     def get_players(self):
         return {packet.packet.number : str(packet.packet.from_key.key) for packet in self.packets.packet}
+
+    def get_blame(self):
+        return [packet.packet.message.blame for packet in self.packets.packet]
 
     def clear_packets(self):
         self.__init__()

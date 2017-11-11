@@ -1,0 +1,76 @@
+
+
+Player #1 get session number.
+
+Player #2 get session number.
+
+Player #3 get session number.
+
+player #2 is about to share verification key with 3 players.
+
+player #3 is about to share verification key with 3 players.
+
+player #1 is about to share verification key with 3 players.
+
+player #1 get 3.
+
+Player 1 begins CoinShuffle protocol  with 3 players..
+
+Player 1 finds sufficient funds..
+
+player #2 get 3.
+
+Player 2 begins CoinShuffle protocol  with 3 players..
+
+Player 2 finds sufficient funds..
+
+player #3 get 3.
+
+Player 3 begins CoinShuffle protocol  with 3 players..
+
+Player 3 finds sufficient funds..
+
+Player 3 has broadcasted the new encryption key..
+
+Player 3 is about to read announcements..
+
+Player # 3
+{1: {u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player 2 has broadcasted the new encryption key..
+
+Player 2 is about to read announcements..
+
+Player # 2
+{1: {u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 2
+{1: {u'03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072': '\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J', u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 3
+{1: {u'03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072': '\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J', u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player 1 has broadcasted the new encryption key..
+
+Player 1 is about to read announcements..
+
+Player # 1
+{1: {u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC\xe2\x8f\x8e\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 1
+{1: {u'030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2': '\n\x98\x02\n\xd0\x01\n\x16XbiTsLWqws9yBwbKOVDLCG\x10\x01\x1aD\nB030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2(\x012l\n$\n"1Q8j5WWfJrJ7yLfLnZC84QMv9inM2yiEqX\x12D\nB03640b91f5c2ced0b1220c8855979106644166de1a46f6751cde2f163f1297595c\x12C\nA 5\xcb\x0b\x0bI\xe3\x19\xc3\xeb\xb7b\xe2o]\x18\x17")\xdb\xdbg5\xde\xfc\xe6\x99\x16\xb4B\xd4\x07)Z\xdbs\xdem\x10\xf3\x1e*(\x9bF\x81NS\xbb?\x98\xc7E]\xdeR\x89\xed!\xa3\x15\x1c\x9f\xdbX', u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC\xe2\x8f\x8e\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 2
+{1: {u'03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072': '\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J', u'030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2': '\n\x98\x02\n\xd0\x01\n\x16XbiTsLWqws9yBwbKOVDLCG\x10\x01\x1aD\nB030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2(\x012l\n$\n"1Q8j5WWfJrJ7yLfLnZC84QMv9inM2yiEqX\x12D\nB03640b91f5c2ced0b1220c8855979106644166de1a46f6751cde2f163f1297595c\x12C\nA 5\xcb\x0b\x0bI\xe3\x19\xc3\xeb\xb7b\xe2o]\x18\x17")\xdb\xdbg5\xde\xfc\xe6\x99\x16\xb4B\xd4\x07)Z\xdbs\xdem\x10\xf3\x1e*(\x9bF\x81NS\xbb?\x98\xc7E]\xdeR\x89\xed!\xa3\x15\x1c\x9f\xdbX', u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 2 recieved all keys for test..
+
+Player 2 reaches phase 2..
+
+Player # 3
+{1: {u'03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072': '\n\x98\x02\n\xd0\x01\n\x16RcQU0HAaxGTo63yY9VC6tq\x10\x02\x1aD\nB03823549016a10eec2350c06181240026f997e86b60973c0882980d5da0495b072(\x012l\n$\n"1AqD2VjS9LikdiWFEAMBLMkYvLBHtGiqUE\x12D\nB02f7cffc7f535d02cdd628bc228d78f2be23033881241b0790f5e2966f4bcbcf93\x12C\nA \'\x0b\x1d\xf2\x82?\xc8\x8bD\x17\xb2E\x1d\x9f\x9e\xe9l\x95\xad\x97n\x08\xcc\xfc\x06-E_\x1f7(RY6g\xe5\x06\xe2\xc1r\xcae\xaa\xc4l\xe9,\x92V\x88\xc3.X9U[\x8a\xe8\\\x11\xce\xa3\xa5J', u'030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2': '\n\x98\x02\n\xd0\x01\n\x16XbiTsLWqws9yBwbKOVDLCG\x10\x01\x1aD\nB030b1368c6fbf4daeb34322250589659e46762cf94df2accde438e72273ef41ac2(\x012l\n$\n"1Q8j5WWfJrJ7yLfLnZC84QMv9inM2yiEqX\x12D\nB03640b91f5c2ced0b1220c8855979106644166de1a46f6751cde2f163f1297595c\x12C\nA 5\xcb\x0b\x0bI\xe3\x19\xc3\xeb\xb7b\xe2o]\x18\x17")\xdb\xdbg5\xde\xfc\xe6\x99\x16\xb4B\xd4\x07)Z\xdbs\xdem\x10\xf3\x1e*(\x9bF\x81NS\xbb?\x98\xc7E]\xdeR\x89\xed!\xa3\x15\x1c\x9f\xdbX', u'03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1': '\n\x98\x02\n\xd0\x01\n\x1641yXIh28KexDNcjpYc6wKG\x10\x03\x1aD\nB03f635b6f170a4c4537040d54af47a171b3bf69a318676e9177959f791bce895f1(\x012l\n$\n"1JwMXSsfZRAYF9k5xkK3SbTwgqadzaa3FC\x12D\nB03923662762a3ff9a47588dffd3a437fded334a20c26dabadaac63fb57537a8fd5\x12C\nA\x1f{x\xcd4\x16\xaa\xfcR\xd5\xe5\xa4\xe3\xc8G\x99\xe1QX!\x8c\x05\x893\xa0\x98jV2\xd7\xfc\x03\xf2\x154\xe6\xc1rwd\xa5\x89_\x95.k+Q\xe0!\xdcMr\xf6\x90\x9d\xa4\x00\xb6;\xd6A\x9b\x9cC'}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}.
+
+Player # 3 recieved all keys for test..
+
+Player 3 reaches phase 2..
+

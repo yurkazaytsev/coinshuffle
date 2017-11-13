@@ -9,7 +9,7 @@ class Commutator(object):
     it use select for unblocking the channel
     the enter symbol is used for terminating the message
     """
-    def __init__(self, host, port, timeout = None, buffsize = 4096, split_value = 128, switch_time = None):
+    def __init__(self, host, port, timeout = None, buffsize = 4096, split_value = 128, switch_time = 1, debuger = None):
         self.__host = host
         self.__port = port
         self.frame = unichr(9166).encode('utf-8')
@@ -22,70 +22,52 @@ class Commutator(object):
         self.out_lifo = deque([])
         self.split_value = split_value
         self.switch_time = switch_time
+        self.debuger = debuger
+        # self.messages = Messages()# Should be removed later
+
+    def debug(self, message):
+        if self.debuger:
+            self.debuger.send(str(message))
 
     def connect(self):
+        self.socket.settimeout(60)
         self.socket.connect((self.__host,self.__port))
+        self.socket.settimeout(self.timeout)
 
-    def send(self, message):
-        # self.socket.sendall(message + self.frame)
-        request = message + self.frame
-        while request:
-            try:
-                send = self.socket.send(request)
-                request = request[send:]
-            except Exception as e:
-                print(e)
-                # print('send timeout error ' + str(len(self.in_lifo)))
-                continue
-            request = request[self.split_value:]
-
-    def recv(self):
-        # return self.socket.recv(self.MAX_BLOCK_SIZE)[:-3]
+    def _recv(self):
+        "bare recv"
         response = ''
         while response[-3:] != self.frame:
-            try:
-                response += self.socket.recv(self.MAX_BLOCK_SIZE)
-            except Exception as e:
-                print(e)
-                continue
-                # print(response)
-                # print('recv timeout error '  + str(len(self.in_lifo)) + ' ' + str(len(self.out_lifo)))
-                # break
+            response += self.socket.recv(self.MAX_BLOCK_SIZE)
         return response[:-3]
 
-    # def recv(self):
-    #     if len(self.in_lifo) is not 0:
-    #         return self.in_lifo.popleft()
-    #     else:
-    #         received = False
-    #         while not received:
-    #             r2r, r2w, err = select.select([self.socket],[self.socket],[], self.switch_time)
-    #             if len(r2r) > 0:
-    #                 print ('recv r2w')
-    #                 received = True
-    #                 return self.bare_recv()
-    #             if len(r2w) > 0 and len(self.out_lifo) > 0:
-    #                 print('recv r2r')
-    #                 self.bare_send(self.out_lifo.popleft())
+    def _send(self, message):
+        "bare send"
+        request = message + self.frame
+        while request:
+            send = self.socket.send(request)
+            request = request[send:]
 
+    def send(self, message):
+        sended = False
+        while not sended:
+            r2r, r2w, r2e = select.select([self.socket],[self.socket],[],self.switch_time)
+            if r2r:
+                self.debug('recv from send: socets state ' + str(r2r) + ";" + str(r2w) + "." + " inlifo" + str(self.in_lifo))
+                self.in_lifo.append(self._recv())
+            elif r2w:
+                self.debug('send from send: socets state ' + str(r2r) + ";" + str(r2w) + "." + " inlifo" + str(self.in_lifo))
+                self._send(message)
+                sended = True
 
-    # def send(self, message):
-    #     if len(self.out_lifo) > 0:
-    #         self.out_lifo.append(message)
-    #         request = self.out_lifo.popleft()
-    #     else:
-    #         request = message
-    #     sended = False
-    #     while not sended:
-    #         print('send')
-    #         r2r, r2w, err = select.select([self.socket],[self.socket],[], self.switch_time)
-    #         if len(r2w) > 0:
-    #             print ('send r2w')
-    #             self.bare_send(request)
-    #             sended = True
-    #         if len(r2r) > 0:
-    #             print ('send r2r')
-    #             self.in_lifo.append(self.bare_recv())
+    def recv(self):
+        r2r, r2w, r2e = select.select([self.socket],[self.socket],[],self.switch_time)
+        if self.in_lifo:
+            self.debug('recv from buffer: socets state ' + str(r2r) + ";" + str(r2w) + "." + " inlifo" + str(self.in_lifo))
+            return self.in_lifo.popleft()
+        else:
+            self.debug('recv from socket: socets state ' + str(r2r) + ";" + str(r2w) + "." + " inlifo" + str(self.in_lifo))
+            return self._recv()
 
     def close(self):
         self.socket.close()

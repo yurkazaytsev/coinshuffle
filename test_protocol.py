@@ -12,11 +12,12 @@ from coin_shuffle import Round
 
 class fakeLogChannel(object):
 
-    def __init__(self):
+    def __init__(self, prefix =''):
+        self.prefix = prefix
         pass
 
     def send(self, message):
-        print(message + ".\n")
+        print(self.prefix + message + ".\n")
 
 class protocolThread(threading.Thread):
     """
@@ -37,6 +38,7 @@ class protocolThread(threading.Thread):
         self.sk = sk
         self.addr_new = addr_new
         self.change = change
+        self.deamon = True
 
     def run(self):
         self.commutator.connect()
@@ -76,7 +78,8 @@ class protocolThread(threading.Thread):
         coin = Coin()
         crypto = Crypto()
         self.messages.clear_packets()
-        log_chan = fakeLogChannel()
+        log_chan = fakeLogChannel(prefix = str(self.number) + ": ")
+        self.commutator.debuger = log_chan
         begin_phase = Phase('Announcement')
         # Make Round
         protocol = Round(
@@ -95,7 +98,7 @@ class protocolThread(threading.Thread):
             self.addr_new,
             self.change)
         protocol.protocol_definition()
-        time.sleep(60)
+        time.sleep(120)
         self.commutator.close()
 #
 from ecdsa.util import number_to_string
@@ -122,7 +125,7 @@ class TestProtocol(unittest.TestCase):
         # generate fake signing keys
         G = generator_secp256k1
         _r  = G.order()
-        number_of_players = 3
+        number_of_players = 5
         players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
         players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
         players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]

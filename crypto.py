@@ -26,17 +26,3 @@ class Crypto(object):
 
     def decrypt(self, message):
         return self.eck.decrypt_message(message)
-
-
-
-# crypta1 = Crypto()
-# crypta2 = Crypto()
-#
-# crypta1.generate_key_pair()
-# crypta2.generate_key_pair()
-#
-# msg = "Hello World!"
-# pub1 = crypta1.export_public_key()
-# ciph = crypta2.encrypt(msg ,pub1)
-#
-# crypta1.decrypt(ciph) == msg

@@ -19,6 +19,9 @@ class Messages(object):
         packet = self.packets.packet.add()
         packet.packet.from_key.key = vk
 
+    # def make_blame(self):
+
+
     def form_last_packet(self, eck, session, number, vk_from , vk_to, phase):
         packet = self.packets.packet[-1]
         packet.packet.session = session

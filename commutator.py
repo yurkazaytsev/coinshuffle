@@ -1,6 +1,7 @@
 from collections import deque
 import socket
 import select
+import time
 
 class Commutator(object):
     """
@@ -23,7 +24,6 @@ class Commutator(object):
         self.split_value = split_value
         self.switch_time = switch_time
         self.debuger = debuger
-        # self.messages = Messages()# Should be removed later
 
     def debug(self, message):
         if self.debuger:
@@ -38,14 +38,22 @@ class Commutator(object):
         "bare recv"
         response = ''
         while response[-3:] != self.frame:
-            response += self.socket.recv(self.MAX_BLOCK_SIZE)
+            try:
+                response += self.socket.recv(self.MAX_BLOCK_SIZE)
+            except Exception as e:
+                self.debug(e)
+                continue
         return response[:-3]
 
     def _send(self, message):
         "bare send"
         request = message + self.frame
         while request:
-            send = self.socket.send(request)
+            try:
+                send = self.socket.send(request)
+            except Exception as e:
+                self.debug(e)
+                continue
             request = request[send:]
 
     def send(self, message):

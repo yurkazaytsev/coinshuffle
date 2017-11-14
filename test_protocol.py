@@ -27,7 +27,7 @@ class protocolThread(threading.Thread):
         threading.Thread.__init__(self)
         self.messages = Messages()
         # self.mailbox = Mailbox(host,port,timeout  = None)
-        self.commutator = Commutator(host, port, timeout = None, switch_time = None)
+        self.commutator = Commutator(host, port, timeout = 10, switch_time = None)
         self.vk = vk
         self.session = None
         self.number = None
@@ -125,7 +125,7 @@ class TestProtocol(unittest.TestCase):
         # generate fake signing keys
         G = generator_secp256k1
         _r  = G.order()
-        number_of_players = 5
+        number_of_players = 3
         players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
         players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
         players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]

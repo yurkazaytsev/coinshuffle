@@ -72,8 +72,9 @@ class Round(object):
             3. store the packets from message to inbox[phase][from_key]
         Then methods reads from inbox not from inchan. I need it to cathc the message from "future"
         """
-        val = self.__inchan.recv()
+        # val = self.__inchan.recv()
         try:
+            val = self.__inchan.recv()
             self.__messages.packets.ParseFromString(val)
         except Exception:
             self.__logchan.send('Decoding Error!')

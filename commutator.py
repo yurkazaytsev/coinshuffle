@@ -15,7 +15,8 @@ class Commutator(object):
         self.__port = port
         self.frame = unichr(9166).encode('utf-8')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.MAX_BLOCK_SIZE = buffsize
         self.timeout = timeout
         self.socket.settimeout(self.timeout)

@@ -1,7 +1,7 @@
 from ecdsa.util import number_to_string
 import ecdsa
 from lib.bitcoin import (generator_secp256k1, point_to_ser, EC_KEY)
-
+import hashlib
 # For now it is ECIES encryption/decryption methods from bitcoin lib. It should be updated for something else i suppose.
 
 class Crypto(object):
@@ -26,3 +26,8 @@ class Crypto(object):
 
     def decrypt(self, message):
         return self.eck.decrypt_message(message)
+
+    def hash(self, text, algorithm = 'sha224'):
+        h = hashlib.new(algorithm)
+        h.update(text)
+        return h.digest()

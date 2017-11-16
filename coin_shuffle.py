@@ -147,7 +147,7 @@ class Round(object):
 
     def equivocation_check(self):
         # compute hash
-        computed_hash =str( hash( str(self.__new_addresses) + str([self.__encryption_keys[self.__players[i]] for i in range(1, self.__N + 1) ])))
+        computed_hash =str(self.__crypto.hash( str(self.__new_addresses) + str([self.__encryption_keys[self.__players[i]] for i in range(1, self.__N + 1) ])))
         # create a new message
         self.__messages.clear_packets()
         # add new hash

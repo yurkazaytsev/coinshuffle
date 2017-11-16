@@ -55,12 +55,13 @@ class protocolThread(threading.Thread):
         self.income.send(msg)
         # req = self.commutator.recv()
         req = self.outcome.recv()
-        print(req)
+        # print(req)
         self.messages.packets.ParseFromString(req)
         self.session = self.messages.packets.packet[-1].packet.session
         self.number = self.messages.packets.packet[-1].packet.number
         if self.session != '':
-             print("Player #"  + str(self.number)+" get session number.\n")
+             # print("Player #"  + str(self.number)+" get session number.\n")
+             self.logger.send("Player #"  + str(self.number)+" get session number.\n")
         # # Here is when announcment should begin
         # req = self.commutator.recv()
         req = self.outcome.recv()
@@ -138,7 +139,7 @@ class TestProtocol(unittest.TestCase):
         # generate fake signing keys
         G = generator_secp256k1
         _r  = G.order()
-        number_of_players = 5
+        number_of_players = 4
         players_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
         players_ecks = [EC_KEY(number_to_string(pvk ,_r))  for pvk in players_pvks]
         players_new_pvks = [ecdsa.util.randrange( pow(2,256) ) %_r   for i in range(number_of_players) ]
